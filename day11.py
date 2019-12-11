@@ -39,20 +39,28 @@ class Robot():
         return 0
     def printHull(self):
         maxX = 0; maxY = 0
+        minX = 0; minY = 0
         for p in self.hull:
             if p[0] > maxX:
                 maxX = p[0]
+            elif p[0] < minX:
+                minX = p[0]
             if p[1] > maxY:
                 maxY = p[1]
+            elif p[1] < minY:
+                minY = p[1]
         maxX += 1; maxY += 1
-        print(maxX, maxY)
+        sizeX = maxX - minX; sizeY = maxY - minY
+        print(sizeX, sizeY)
         hull = []
-        for h in range(maxY):
-            hull.append(['.'] * maxX)
+        for h in range(sizeY):
+            hull.append(['.'] * sizeX)
         for p in self.hull:
             if self.hull[p] == 1:
-                print(p)
-                hull[p[1]][p[0]] = '#'
+                try:
+                    hull[p[1]-minY][p[0]-minX] = '#'
+                except:
+                    print(p)
         for line in hull:
             for c in line:
                 print(c, end='')
