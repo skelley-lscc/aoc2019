@@ -71,4 +71,5 @@ for _ in xfer[2]:
     print(_)
     count += 1
 print("Length of path (including ends) is",count)
+print("Subtract 3 for the puzzle answer")
 

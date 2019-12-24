@@ -156,6 +156,7 @@ class IntCode():
         else:
             self.printOp(4)
             print("Instruction error at",self.pc)
+            self.state = 99
     def doRunInteractive(self):
         while self.state == 0:
             self.doStep()
