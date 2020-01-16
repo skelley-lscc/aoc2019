@@ -37,5 +37,39 @@ def readData(filename):
     return data
 
 stepDict = readData("day14-1.txt")
-top = stepDict["FUEL"]
+fuel = stepDict["FUEL"]
+# to make a fuel, the ingredients need to be made
+# loop all the way back to ORE
 print(stepDict)
+print(fuel)     # uses REPR
+needs = {}
+for t in fuel.requires:
+    #print(t)    # this is ['4', 'ITEM']
+    needs[t[1]] = int(t[0])
+print(needs)
+while len(needs) > 1:
+    print(needs)
+    # make a list of the next items to process
+    next = []
+    for item in needs:
+        if item != 'ORE':
+            next.append(item)
+    print(next)
+    # pop each need, and add a multiple of the ingredients back to needs
+    for item in next:
+        qtyNeeded = int(needs.pop(item))
+        reqs = stepDict[item]
+        print(reqs)
+        qtyProvided = int(reqs.product[0])
+        multiple = qtyNeeded / qtyProvided
+        if multiple * qtyProvided < qtyNeeded:
+            multiple += 1
+        print(qtyNeeded, qtyProvided, multiple)
+        for ingredient in reqs.requires:
+            prevQty = 0
+            if ingredient[1] in needs:
+                prevQty = needs[ingredient[1]]
+                print("-- already had",prevQty,ingredient[1])
+            needs[ingredient[1]] = prevQty + int(ingredient[0]) * multiple
+            print("- add ",needs[ingredient[1]], " ", ingredient[1])
+print(needs)
