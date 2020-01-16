@@ -43,6 +43,8 @@ fuel = stepDict["FUEL"]
 print(stepDict)
 print(fuel)     # uses REPR
 needs = {}
+# keep up with the extra generated, use as we can
+extra = {}
 for t in fuel.requires:
     #print(t)    # this is ['4', 'ITEM']
     needs[t[1]] = int(t[0])
@@ -58,18 +60,35 @@ while len(needs) > 1:
     # pop each need, and add a multiple of the ingredients back to needs
     for item in next:
         qtyNeeded = int(needs.pop(item))
+        if item in extra:
+            overage = extra[item]
+            if qtyNeeded < overage:
+                print("-- used",qtyNeeded,"overage of",item,overage-qtyNeeded,"left")
+                extra[item] = overage - qtyNeeded
+                qtyNeeded = 0
+            else:
+                qtyNeeded -= overage
+                print("-- used",overage,"overage of",item,"still need",qtyNeeded)
+                extra.pop(item)
         reqs = stepDict[item]
         print(reqs)
         qtyProvided = int(reqs.product[0])
-        multiple = qtyNeeded / qtyProvided
+        multiple = int(qtyNeeded / qtyProvided)
         if multiple * qtyProvided < qtyNeeded:
+            # make an additional one
             multiple += 1
+            # add to extra production
+            prevExtra = 0
+            if item in extra:
+                prevExtra = extra[item]
+            extra[item] = (multiple * qtyProvided) - qtyNeeded
+            print("-- now have",extra[item],"extra of",item)
         print(qtyNeeded, qtyProvided, multiple)
         for ingredient in reqs.requires:
             prevQty = 0
             if ingredient[1] in needs:
                 prevQty = needs[ingredient[1]]
-                print("-- already had",prevQty,ingredient[1])
+                print("-- already needed",prevQty,ingredient[1])
             needs[ingredient[1]] = prevQty + int(ingredient[0]) * multiple
             print("- add ",needs[ingredient[1]], " ", ingredient[1])
 print(needs)
