@@ -46,9 +46,8 @@ class Robot():
         self.requestedDir = next
         return next
     def moveResult(self, result):
-        if result == 2: self.found = True
         # explore whole maze by not stopping at 2
-        # self.found = False
+        self.found = False
         # calculate where our new position would be
         newX = self.x; newY = self.y
         if self.requestedDir == 1: newX-=1
@@ -63,6 +62,13 @@ class Robot():
             self.x = newX; self.y = newY
             if self.state == 0:
                 self.moveList.append(self.requestedDir)
+        # found generator, store position for part 2
+        if result == 2:
+            # turn off found for full maze for part 2
+            #self.found = True
+            self.generatorX = self.x
+            self.generatorY = self.y
+            self.movesToGenerator = self.moveList[:]
     def printHull(self):
         maxX = 0; maxY = 0
         minX = 0; minY = 0
@@ -95,6 +101,34 @@ class Robot():
             for c in line:
                 print(c, end='')
             print()
+    def fillHull(self):
+        # starting with the generator spot, fill the
+        # dots one step at a time
+        fill = [(self.generatorX, self.generatorY)]
+        minutes = -1
+        while len(fill) > 0:
+            minutes += 1
+            for p in fill:
+                self.hull[p] = 2
+            fill = []
+            # find all the adjacent floor to o2
+            for p in self.hull:
+                if self.hull[p] == 2:
+                    q=(p[0]-1,p[1])
+                    if self.hull[q] == 1:
+                        fill.append(q)
+                    q=(p[0]+1,p[1])
+                    if self.hull[q] == 1:
+                        fill.append(q)
+                    q=(p[0],p[1]-1)
+                    if self.hull[q] == 1:
+                        fill.append(q)
+                    q=(p[0],p[1]+1)
+                    if self.hull[q] == 1:
+                        fill.append(q)
+            # if you want to see it fill
+            # self.printHull()
+        print("Minutes to fill -- ", minutes)
 
 def parseLine(data):
     xmem = []
@@ -132,5 +166,7 @@ while  machine.state != 99 and robot.found == False:
         robot.moveResult(color)
         machine.doRun()
 robot.printHull()
-print("moves -- ", len(robot.moveList))
-print(robot.moveList)
+print("gen at (%d, %d)" % (robot.generatorX, robot.generatorY))
+print("moves -- ", len(robot.movesToGenerator))
+print(robot.movesToGenerator)
+robot.fillHull()
