@@ -12,31 +12,43 @@ class Robot():
         self.dy = -1
         self.hull = {}
         self.hull[(self.x,self.y)] = "."
+        self.moveList = []
         self.found = False
         self.newSquareCount = 0
-        self.state = 0  # 0 search, 1 mapping
+        self.state = 0  # 0 search, 1 backtrack
         self.moveQueue = []
         self.requestedDir = 0
     def getNextMove(self):
         # is there unexplored next to our current position?
-        if self.state == 0:
-            if len(self.moveQueue) == 0:
-                if (self.x-1,self.y) not in self.hull:
-                    self.moveQueue.append(1)
-                elif (self.x+1,self.y) not in self.hull:
-                    self.moveQueue.append(2)
-                elif (self.x,self.y-1) not in self.hull:
-                    self.moveQueue.append(3)
-                elif (self.x,self.y+1) not in self.hull:
-                    self.moveQueue.append(4)
+        if len(self.moveQueue) == 0:
+            if (self.x-1,self.y) not in self.hull:
+                self.moveQueue.append(1)
+            elif (self.x+1,self.y) not in self.hull:
+                self.moveQueue.append(2)
+            elif (self.x,self.y-1) not in self.hull:
+                self.moveQueue.append(3)
+            elif (self.x,self.y+1) not in self.hull:
+                self.moveQueue.append(4)
         if len(self.moveQueue) > 0:
+            self.state = 0
             next = self.moveQueue.pop()
         else:
-            next = 0; self.found = True # not really
+            self.state = 1
+            if len(self.moveList) > 0:
+                zz = self.moveList.pop(-1)
+            else:
+                zz = 0; self.found = True
+            if zz == 1: next = 2
+            elif zz == 2: next = 1
+            elif zz == 3: next = 4
+            elif zz == 4: next = 3
+            else: next = 0
         self.requestedDir = next
         return next
     def moveResult(self, result):
         if result == 2: self.found = True
+        # explore whole maze by not stopping at 2
+        # self.found = False
         # calculate where our new position would be
         newX = self.x; newY = self.y
         if self.requestedDir == 1: newX-=1
@@ -45,12 +57,12 @@ class Robot():
         if self.requestedDir == 4: newY+=1
         # store the result of our attempted move
         self.hull[(newX,newY)] = result
-        if self.state == 0:
-            # search mode, return to position
-            pass
+        # was it a wall? or not
         if result > 0:
             # not a wall, update our position
             self.x = newX; self.y = newY
+            if self.state == 0:
+                self.moveList.append(self.requestedDir)
     def printHull(self):
         maxX = 0; maxY = 0
         minX = 0; minY = 0
@@ -119,5 +131,6 @@ while  machine.state != 99 and robot.found == False:
         color = machine.getOutput()
         robot.moveResult(color)
         machine.doRun()
-print(robot.hull)
 robot.printHull()
+print("moves -- ", len(robot.moveList))
+print(robot.moveList)
